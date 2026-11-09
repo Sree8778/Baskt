@@ -1,0 +1,42 @@
+# Python & Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment secrets
+.env
+.env.local
+*.env
+
+# Android & Gradle
+.gradle/
+build/
+*/build/
+*/*/build/
+*/*/*/build/
+.idea/
+*.iml
+.cxx/
+local.properties
+captures/
+*.apk
+*.aab
+*.jks
+*.keystore
+
+# System & IDE files
+.DS_Store
+Thumbs.db
+*.log
+.vscode/

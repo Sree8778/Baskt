@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SupportAgent</string>
+    <string name="accessibility_service_label">ProxyAgent Ghost Touch</string>
+    <string name="accessibility_service_description">Autonomous on-device proxy agent that automates shopping carts, navigation, and service tasks on your behalf.</string>
+</resources>

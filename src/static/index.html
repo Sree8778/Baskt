@@ -1,0 +1,3185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreshCart AI • Voice Grocery Assistant (Walmart & Kroger)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --primary: #059669;
+            --primary-light: #ecfdf5;
+            --primary-dark: #047857;
+            --primary-border: #a7f3d0;
+            --walmart: #0071dc;
+            --walmart-light: #eff6ff;
+            --kroger: #004c97;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+            --border-light: #e2e8f0;
+            --border-card: #f1f5f9;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --danger-border: #fecaca;
+            --warning: #d97706;
+            --warning-bg: #fffbeb;
+            --warning-border: #fde68a;
+            --shadow-subtle: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+            --shadow-elevated: 0 12px 32px -4px rgba(15, 23, 42, 0.1);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Header */
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25);
+        }
+
+        .brand-name {
+            font-weight: 800;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-tagline {
+            font-size: 0.72rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .delivery-pill {
+            background: #f1f5f9;
+            border: 1px solid var(--border-light);
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .delivery-pill strong { color: var(--text-main); }
+
+        .profile-badges {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-allergy {
+            background: var(--danger-bg);
+            color: var(--danger);
+            border: 1px solid var(--danger-border);
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-diet {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid var(--primary-border);
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-cart-toggle {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-cart-toggle:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .cart-counter {
+            background: white;
+            color: var(--primary);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+
+        /* Main Container */
+        .app-container {
+            max-width: 1400px;
+            margin: 28px auto;
+            padding: 0 28px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 390px;
+            gap: 28px;
+            align-items: start;
+        }
+
+        @media (max-width: 1080px) {
+            .app-container { grid-template-columns: 1fr; }
+        }
+
+        /* Voice AI Hub Card */
+        .voice-hub {
+            background: linear-gradient(145deg, #ffffff, #f0fdf4);
+            border: 1px solid var(--primary-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-hub-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .voice-status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse-ring 1.8s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .voice-interaction-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 9999px;
+            padding: 6px 8px 6px 20px;
+            box-shadow: var(--shadow-subtle);
+            transition: all 0.2s ease;
+        }
+
+        .voice-interaction-area:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+        }
+
+        .voice-input-text {
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            outline: none;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .mic-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            flex-shrink: 0;
+        }
+
+        .mic-button:hover { transform: scale(1.08); }
+        .mic-button.recording {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            animation: pulse-mic 1s infinite alternate;
+        }
+
+        @keyframes pulse-mic {
+            from { transform: scale(1); }
+            to { transform: scale(1.12); }
+        }
+
+        .assistant-response-bubble {
+            margin-top: 16px;
+            padding: 14px 18px;
+            background: #ffffff;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary);
+            font-size: 0.92rem;
+            line-height: 1.5;
+            color: var(--text-main);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .quick-chips-wrapper {
+            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .chip-button {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .chip-button:hover {
+            border-color: var(--primary);
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .chip-button.chip-warn {
+            background: var(--warning-bg);
+            border-color: var(--warning-border);
+            color: var(--warning);
+        }
+
+        /* Store Filter Tabs */
+        .store-selector-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .store-selector-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-right: 6px;
+        }
+
+        .store-btn {
+            background: #f1f5f9;
+            border: 1px solid var(--border-light);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .store-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .store-btn.btn-walmart.active {
+            background: var(--walmart);
+            color: white;
+            border-color: var(--walmart);
+        }
+
+        .store-btn.btn-kroger.active {
+            background: var(--kroger);
+            color: white;
+            border-color: var(--kroger);
+        }
+
+        /* Catalog Search and Aisle Navigation */
+        .catalog-search-bar-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+            background: #ffffff;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .catalog-search-icon {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+        }
+
+        .catalog-search-input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background: transparent;
+        }
+
+        .category-aisle-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 18px;
+            scrollbar-width: thin;
+        }
+
+        .aisle-btn {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            padding: 7px 14px;
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .aisle-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .aisle-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .store-diff-pill {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #0369a1;
+            background: #f0f9ff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        .allergy-tag-warning {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--danger);
+            background: var(--danger-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s ease;
+            box-shadow: var(--shadow-subtle);
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .product-img-wrapper {
+            height: 190px;
+            background: #ffffff;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border-card);
+            padding: 12px;
+        }
+
+        .product-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-img { transform: scale(1.06); }
+
+        .store-tag-float {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .store-tag-wm { background: var(--walmart); color: white; }
+        .store-tag-kr { background: var(--kroger); color: white; }
+
+        .product-badge-float {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .product-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-brand {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .product-title {
+            font-size: 0.98rem;
+            font-weight: 700;
+            line-height: 1.35;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            flex-grow: 1;
+        }
+
+        .product-price-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-top: 12px;
+            margin-bottom: 14px;
+        }
+
+        .product-price {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .product-unit {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .product-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .unit-select {
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            background: #ffffff;
+            font-size: 0.82rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .btn-add-cart {
+            flex-grow: 1;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-add-cart:hover { background: var(--primary-dark); }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            position: sticky;
+            top: 90px;
+        }
+
+        .cart-sidebar-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 18px;
+        }
+
+        .cart-items-container {
+            max-height: 380px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .cart-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-card);
+            gap: 12px;
+        }
+
+        .cart-item-desc { flex-grow: 1; }
+        .cart-item-name { font-size: 0.9rem; font-weight: 700; }
+        .cart-item-meta { font-size: 0.78rem; color: var(--text-muted); }
+        .cart-item-price { font-size: 0.95rem; font-weight: 800; color: var(--primary-dark); }
+
+        .btn-remove-item {
+            background: transparent;
+            border: none;
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .btn-remove-item:hover { color: var(--danger); }
+
+        .bill-details {
+            background: #f8fafc;
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .bill-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .bill-row.total {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-light);
+        }
+
+        .btn-checkout {
+            width: 100%;
+            background: #0f172a;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+        }
+
+        .btn-checkout:hover { background: #1e293b; }
+
+        .btn-optimize-cart {
+            width: 100%;
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-optimize-cart:hover {
+            filter: brightness(1.08);
+            transform: translateY(-1px);
+        }
+
+        /* Walmart Supercenter Banner */
+        .walmart-storefront-banner {
+            background: linear-gradient(135deg, #0071dc, #004f9a);
+            color: white;
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 14px rgba(0, 113, 220, 0.2);
+        }
+
+        .walmart-banner-badge {
+            background: #ffc220;
+            color: #000000;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+        }
+
+        /* Product Details Inspection Modal */
+        .product-modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(6px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .product-modal-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            max-width: 780px;
+            width: 100%;
+            position: relative;
+            box-shadow: var(--shadow-elevated);
+            animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.95) translateY(12px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 16px; right: 18px;
+            background: #f1f5f9;
+            border: none;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close-btn:hover { background: #e2e8f0; color: var(--text-main); }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+            padding: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-grid { grid-template-columns: 1fr; padding: 20px; }
+        }
+
+        .modal-img-area {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            height: 300px;
+        }
+
+        .modal-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .modal-badge-org {
+            position: absolute;
+            top: 12px; left: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .modal-store-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: white;
+            background: var(--walmart);
+            margin-bottom: 6px;
+        }
+
+        .modal-brand {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .modal-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.3;
+            margin: 4px 0 6px 0;
+        }
+
+        .modal-upc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: monospace;
+            margin-bottom: 12px;
+        }
+
+        .modal-rating-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .modal-price-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            margin: 14px 0;
+        }
+
+        .modal-price {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .modal-savings-pill {
+            background: #eff6ff;
+            color: #0284c7;
+            font-size: 0.82rem;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .allergy-inspect-box {
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            margin-top: 12px;
+        }
+
+        .allergy-safe { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+        .allergy-warn { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+        .modal-actions-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .qty-stepper {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: var(--radius-sm);
+            padding: 4px;
+        }
+
+        .btn-step {
+            border: none;
+            background: #ffffff;
+            width: 34px; height: 34px;
+            border-radius: var(--radius-sm);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .qty-number {
+            padding: 0 14px;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .btn-add-cart-large {
+            flex-grow: 1;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 13px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-add-cart-large:hover { background: var(--primary-dark); }
+
+        /* Allergy Banner */
+        .allergy-banner {
+            position: fixed;
+            bottom: 28px;
+            left: 28px;
+            max-width: 480px;
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--warning-border);
+            padding: 18px 20px;
+            box-shadow: var(--shadow-elevated);
+            z-index: 100;
+            display: none;
+        }
+
+        .allergy-actions { display: flex; gap: 10px; margin-top: 12px; }
+
+        .btn-substitute {
+            background: var(--warning);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Dual Mode Switcher */
+        .mode-switcher-container {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 9999px;
+            border: 1px solid var(--border-light);
+            gap: 4px;
+        }
+
+        .mode-switch-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .mode-switch-btn.active {
+            background: #ffffff;
+            color: var(--text-main);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .mode-badge-pulse {
+            background: #10b981;
+            color: white;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            letter-spacing: 0.02em;
+            animation: pulseSoft 2s infinite;
+        }
+
+        @keyframes pulseSoft {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.05); }
+        }
+
+        /* Namma Yatri Ethos Banner */
+        .namma-banner {
+            background: linear-gradient(135deg, #064e3b, #047857);
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 12px rgba(6, 78, 59, 0.15);
+        }
+
+        .namma-badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .namma-text {
+            font-size: 0.82rem;
+            line-height: 1.4;
+            opacity: 0.95;
+        }
+
+        /* Request In-Store Neighbor Button in Cart */
+        .btn-neighbor-request {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-neighbor-request:hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+        }
+
+        /* Shopper Mode Dashboard */
+        .shopper-dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 28px;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 28px;
+        }
+
+        @media (max-width: 992px) {
+            .shopper-dashboard { grid-template-columns: 1fr; padding: 16px; }
+        }
+
+        .shopper-header-banner {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .shopper-store-select {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .shopper-store-dropdown {
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-main);
+            background: #f8fafc;
+        }
+
+        .shopper-radar-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            border: 1px solid var(--primary-border);
+        }
+
+        /* Radar Order Card */
+        .radar-card {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow-card);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .radar-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .radar-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+
+        .radar-cust-name {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radar-bounty-badge {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .radar-item-preview-list {
+            display: flex;
+            gap: 10px;
+            margin: 14px 0;
+            overflow-x: auto;
+            padding-bottom: 6px;
+        }
+
+        .radar-item-thumb {
+            width: 55px;
+            height: 55px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            object-fit: contain;
+            background: #ffffff;
+            padding: 4px;
+        }
+
+        .btn-accept-order {
+            background: var(--text-main);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-accept-order:hover {
+            background: #1e293b;
+            transform: translateY(-1px);
+        }
+
+        /* Active In-Store Aisle Navigator */
+        .aisle-navigator {
+            background: #ffffff;
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .aisle-step-bar {
+            display: flex;
+            gap: 10px;
+            margin: 16px 0;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .aisle-step-pill {
+            background: #f1f5f9;
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .aisle-step-pill.current {
+            background: var(--primary);
+            color: white;
+        }
+
+        .pick-item-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            background: #f8fafc;
+            border: 1px solid var(--border-light);
+            margin-bottom: 12px;
+            gap: 16px;
+        }
+
+        .pick-item-card.picked {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+        }
+
+        .btn-scan-upc {
+            background: #ffffff;
+            color: var(--text-main);
+            border: 1px solid var(--border-light);
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-scan-upc:hover {
+            background: #f1f5f9;
+            border-color: var(--text-main);
+        }
+
+        /* Earner Wallet Sidebar */
+        .earner-wallet-card {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .wallet-balance-big {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #065f46;
+            margin: 8px 0 16px 0;
+        }
+
+        .btn-cashout {
+            width: 100%;
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-cashout:hover {
+            filter: brightness(1.08);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="header-container">
+            <a href="#" class="brand-logo">
+                <div class="brand-icon">🛒</div>
+                <div class="brand-name">
+                    <span>FreshCart AI</span>
+                    <span class="brand-tagline">Multi-Store • Walmart & Kroger Comparison</span>
+                </div>
+            </a>
+
+            <!-- Dual Mode Switcher: Customer vs In-Store Earner -->
+            <div class="mode-switcher-container">
+                <button id="modeBtnCustomer" class="mode-switch-btn active" onclick="switchPlatformMode('customer')">
+                    🛒 Order with AI
+                </button>
+                <button id="modeBtnShopper" class="mode-switch-btn" onclick="switchPlatformMode('shopper')">
+                    ⚡ In-Store Earner <span class="mode-badge-pulse" id="openOrdersPill">2 Live</span>
+                </button>
+            </div>
+
+            <div class="delivery-pill">
+                <span>📍 Deliver to: <strong>124 Market St, Suite 400</strong></span>
+                <span>•</span>
+                <span style="color: var(--primary); font-weight: 700;">Today, 6:00 - 8:00 PM</span>
+            </div>
+
+            <div class="profile-badges">
+                <div class="badge-allergy"><span>⚠️ Peanut Allergy Shield</span></div>
+                <div class="badge-diet"><span>🌱 Organic Preferred</span></div>
+                <button class="btn-cart-toggle" onclick="scrollToCart()">
+                    <span>🛒 Cart</span>
+                    <span class="cart-counter" id="cartCountBadge">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CUSTOMER PLATFORM VIEW -->
+    <div id="customerPlatformView">
+        <div style="max-width: 1400px; margin: 16px auto 0 auto; padding: 0 28px;">
+            <div class="namma-banner">
+                <div class="namma-badge">🌿 Zero-Commission Protocol</div>
+                <div class="namma-text">
+                    <strong>The Namma Yatri Model for Groceries:</strong> True Walmart shelf prices with 0% corporate markup. When you order for neighbor delivery, <strong>100% of your delivery reward goes directly to your neighbor</strong> with zero platform cut!
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="app-container">
+            
+            <!-- Left Column: Voice Hub + Store Catalog -->
+            <section>
+            
+            <!-- Voice Assistant Hub -->
+            <div class="voice-hub">
+                <div class="voice-hub-header">
+                    <div class="voice-status-indicator">
+                        <div class="pulse-dot"></div>
+                        <span id="voiceStatusText">Voice Assistant Connected • Ready for commands</span>
+                    </div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
+                        LiveKit Channel: <code style="color:var(--walmart);">cart_sync</code>
+                    </span>
+                </div>
+
+                <div class="voice-interaction-area">
+                    <input type="text" id="voiceCommandInput" class="voice-input-text" 
+                        placeholder="Say or type 'Add 1 gallon organic milk' or 'Compare milk prices'..." 
+                        onkeydown="if(event.key === 'Enter') handleVoiceCommand();">
+                    <button class="mic-button" id="btnMic" onclick="toggleMicrophone()" title="Click to speak">
+                        🎙️
+                    </button>
+                </div>
+
+                <!-- Live Spoken Assistant Response Bubble -->
+                <div class="assistant-response-bubble" id="assistantBubble" style="display: none;">
+                    <div style="font-size: 1.2rem;">🤖</div>
+                    <div>
+                        <strong style="color: var(--primary-dark); font-size: 0.8rem; display: block; margin-bottom: 2px;">ASSISTANT RESPONSE:</strong>
+                        <span id="assistantSpeechText">"I compared stores: Walmart Great Value Organic Milk is $4.68 vs Kroger Simple Truth at $5.49."</span>
+                    </div>
+                </div>
+
+                <!-- Quick Prompt Chips -->
+                <div class="quick-chips-wrapper">
+                    <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted);">Real Voice Prompts:</span>
+                    <button class="chip-button" onclick="sendQuickUtterance('Add Fairlife milk from Walmart')">🥛 Fairlife Milk ($4.48)</button>
+                    <button class="chip-button" onclick="sendQuickUtterance('Add Vital Farms eggs')">🥚 Vital Farms Eggs ($5.98)</button>
+                    <button class="chip-button" onclick="sendQuickUtterance('Add Dave\'s killer bread')">🍞 Dave's Bread ($5.98)</button>
+                    <button class="chip-button" onclick="sendQuickUtterance('Add Kerrygold butter')">🧈 Kerrygold Butter ($4.48)</button>
+                    <button class="chip-button" onclick="sendQuickUtterance('Add Rao\'s marinara sauce')">🍝 Rao's Marinara ($6.98)</button>
+                    <button class="chip-button" onclick="sendQuickUtterance('Add Cheerios cereal')">🥣 Cheerios ($3.98)</button>
+                    <button class="chip-button chip-warn" onclick="sendQuickUtterance('Add peanut butter')">⚠️ Peanut Allergy Shield</button>
+                    <button class="chip-button" onclick="sendQuickUtterance('Checkout my cart')">⚡ 1-Tap Checkout</button>
+                </div>
+            </div>
+
+            <!-- Instant Real Catalog Search -->
+            <div class="catalog-search-bar-container">
+                <span class="catalog-search-icon">🔍</span>
+                <input type="text" id="catalogSearchInput" class="catalog-search-input" 
+                    placeholder="Search real products (e.g. Fairlife, Vital Farms, Chobani, Dave's Bread, Rao's, Cheerios, Kerrygold)..." 
+                    oninput="handleCatalogSearch(this.value)">
+                <span id="catalogCountTag" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: #f1f5f9; padding: 4px 10px; border-radius: 9999px;">
+                    Loading items...
+                </span>
+            </div>
+
+            <!-- Category Aisle Bar -->
+            <div class="category-aisle-bar" id="categoryAisleBar">
+                <button class="aisle-btn active" onclick="setCategoryFilter('all', this)">🛒 All Aisles</button>
+                <button class="aisle-btn" onclick="setCategoryFilter('Dairy', this)">🥛 Dairy & Eggs</button>
+                <button class="aisle-btn" onclick="setCategoryFilter('Bakery', this)">🍞 Artisan Bakery</button>
+                <button class="aisle-btn" onclick="setCategoryFilter('Produce', this)">🍎 Fresh Produce</button>
+                <button class="aisle-btn" onclick="setCategoryFilter('Pantry', this)">🍝 Pantry & Sauces</button>
+                <button class="aisle-btn" onclick="setCategoryFilter('Breakfast', this)">🥣 Breakfast & Cereals</button>
+                <button class="aisle-btn" onclick="setCategoryFilter('Snacks', this)">🍫 Snacks & Treats</button>
+            </div>
+
+            <!-- Store Selector Bar -->
+            <div class="store-selector-bar">
+                <span class="store-selector-label">Retailer:</span>
+                <button class="store-btn active" onclick="setStoreFilter('all', this)">🏪 All Stores (Compare Prices)</button>
+                <button class="store-btn btn-walmart" onclick="setStoreFilter('walmart', this)">💙 Walmart Supercenter (Great Value & Rollbacks)</button>
+                <button class="store-btn btn-kroger" onclick="setStoreFilter('kroger', this)">🛒 Kroger (Simple Truth / National)</button>
+            </div>
+
+            <!-- Walmart Supercenter Spotlight Banner -->
+            <div class="walmart-storefront-banner" id="walmartStoreBanner" style="display: none;">
+                <div>
+                    <div style="font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span>💙 Walmart Supercenter Storefront</span>
+                        <span class="walmart-banner-badge">Rollbacks Live</span>
+                    </div>
+                    <p style="font-size:0.82rem; opacity:0.95; margin-top:3px;">
+                        Authentic Great Value, Marketside, and everyday low prices. Free pickup & delivery today!
+                    </p>
+                </div>
+                <button class="chip-button" style="background:#ffffff; color:#0071dc; font-weight:800; border:none; padding:8px 16px;" onclick="handleCatalogSearch('great value')">
+                    💙 Great Value Aisle
+                </button>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid" id="productsGrid">
+                <!-- Dynamically rendered -->
+            </div>
+
+        </section>
+
+        <!-- Right Column: Cart Sidebar -->
+        <aside class="cart-sidebar" id="cartSidebar">
+            <div class="cart-sidebar-title">
+                <span>Synchronized Cart</span>
+                <span style="font-size: 0.75rem; background: var(--primary-light); color: var(--primary-dark); padding: 4px 10px; border-radius: 9999px;">
+                    US Units
+                </span>
+            </div>
+
+            <div class="cart-items-container" id="cartItemsList">
+                <div style="text-align:center; padding:40px 10px; color:var(--text-muted);">
+                    <div style="font-size:2.5rem; margin-bottom:8px;">🛒</div>
+                    <p style="font-weight:700; color:var(--text-main);">Your cart is empty</p>
+                    <p style="font-size:0.82rem;">Speak to the assistant or add items from the aisle!</p>
+                </div>
+            </div>
+
+            <div class="bill-details" id="cartBillSection" style="display: none;">
+                <div class="bill-row"><span>Items Subtotal</span><span id="billSubtotal">$0.00</span></div>
+                <div class="bill-row"><span>Estimated Sales Tax (8.25%)</span><span id="billTax">$0.00</span></div>
+                <div class="bill-row"><span>Delivery Fee</span><span id="billDelivery">$3.99</span></div>
+                <div class="bill-row total"><span>Order Total</span><span id="billTotal" style="color:var(--primary);">$0.00</span></div>
+            </div>
+
+            <button class="btn-optimize-cart" id="btnOptimizeCart" onclick="optimizeCartSavings()" style="display: none;">
+                ⚡ Optimize Cart (Save with Walmart)
+            </button>
+
+            <button class="btn-neighbor-request" id="btnRequestNeighbor" onclick="openNeighborModal()" style="display: none;">
+                🤝 Request In-Store Neighbor (0% Platform Cut)
+            </button>
+
+            <button class="btn-checkout" id="btnCheckout" onclick="triggerCheckout()" style="display: none;">
+                ⚡ Biometric 1-Tap Checkout
+            </button>
+        </aside>
+
+    </main>
+    </div> <!-- /customerPlatformView -->
+
+    <!-- IN-STORE EARNER PLATFORM VIEW (NAMMA YATRI SHOPPER ETHOS) -->
+    <div id="shopperPlatformView" style="display: none;">
+        <div class="shopper-dashboard">
+            
+            <!-- Left Side: Radar Orders & In-Store Aisle Navigator -->
+            <div>
+                <!-- Top Status Banner -->
+                <div class="shopper-header-banner">
+                    <div class="shopper-store-select">
+                        <span style="font-size:1.5rem;">🏪</span>
+                        <div>
+                            <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:800;">Current In-Store Geofence:</div>
+                            <select id="shopperStoreDropdown" class="shopper-store-dropdown" onchange="fetchShopperOrders()">
+                                <option value="walmart">Walmart Supercenter (#1842 - Bentonville, AR)</option>
+                                <option value="kroger">Kroger Marketplace (#402)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="shopper-radar-status">
+                        <span style="color:#10b981;">●</span>
+                        <span id="shopperRadarStatusText">GPS Verified In-Store • 2 Runs Waiting</span>
+                    </div>
+                </div>
+
+                <!-- Active In-Store Pick Screen (Hidden until an order is accepted) -->
+                <div id="activeAisleNavigator" class="aisle-navigator" style="display: none;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                        <div>
+                            <span style="background:var(--primary); color:white; font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:9999px;">
+                                RUN IN PROGRESS
+                            </span>
+                            <h2 style="font-size:1.35rem; font-weight:800; margin-top:8px;" id="activeNavCustTitle">
+                                Shopping for Emily K. (0.6 mi dropoff)
+                            </h2>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;" id="activeNavNotes">
+                                Note: Please leave on porch by the blue planter.
+                            </p>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:1.5rem; font-weight:800; color:#065f46;" id="activeNavBounty">+$7.25</div>
+                            <span style="font-size:0.72rem; color:var(--text-muted); font-weight:700;">100% Direct Payout</span>
+                        </div>
+                    </div>
+
+                    <!-- AI Linear Aisle Sequence Bar -->
+                    <div style="margin-top:16px;">
+                        <span style="font-size:0.75rem; font-weight:800; text-transform:uppercase; color:var(--text-muted);">
+                            AI Linear Aisle Path (Zero Backtracking):
+                        </span>
+                        <div class="aisle-step-bar" id="aisleStepBar">
+                            <!-- Dynamically generated aisle pills -->
+                        </div>
+                    </div>
+
+                    <!-- Item Picking Checklist with UPC Verification -->
+                    <div style="margin-top:16px;" id="activePickItemsList">
+                        <!-- Dynamically filled with pick items -->
+                    </div>
+
+                    <!-- Progress and Actions -->
+                    <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border-light); padding-top:16px;">
+                        <span id="pickProgressText" style="font-size:0.9rem; font-weight:700; color:var(--text-main);">
+                            Items Picked: 0 / 3
+                        </span>
+                        <button id="btnFinishCheckout" style="background:#0f172a; color:white; border:none; padding:12px 24px; font-weight:800; border-radius:var(--radius-sm); cursor:pointer;" onclick="finishCheckoutRun()">
+                            🧾 Proceed to Register & Delivery
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Feed of Available Nearby Runs -->
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <div>
+                            <h3 style="font-size:1.25rem; font-weight:800;">Available Neighbor Runs</h3>
+                            <p style="font-size:0.82rem; color:var(--text-muted);">Pick these up while shopping your own basket. Zero platform commission deducted.</p>
+                        </div>
+                        <button onclick="fetchShopperOrders()" style="background:#f1f5f9; border:none; padding:8px 14px; border-radius:9999px; font-weight:700; font-size:0.8rem; cursor:pointer;">
+                            🔄 Refresh Board
+                        </button>
+                    </div>
+
+                    <div id="shopperOrdersFeed">
+                        <!-- Dynamically filled -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Side: Shopper Wallet & Payouts (0% Commission) -->
+            <aside>
+                <div class="earner-wallet-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.85rem; font-weight:800; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.04em;">Shopper Wallet</span>
+                        <span style="background:#ecfdf5; color:#065f46; font-size:0.75rem; font-weight:800; padding:3px 10px; border-radius:9999px;">0% Platform Fee</span>
+                    </div>
+
+                    <div class="wallet-balance-big" id="walletAvailableBalance">$18.50</div>
+                    <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">
+                        Available for Instant Transfer
+                    </div>
+
+                    <button class="btn-cashout" onclick="triggerWalletCashout()">
+                        ⚡ Instant Cashout ($0 Fee)
+                    </button>
+
+                    <div style="margin-top:24px; padding-top:18px; border-top:1px solid var(--border-card);">
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:8px;">
+                            <span style="color:var(--text-muted);">Lifetime Earnings</span>
+                            <strong id="walletLifetimeEarnings">$142.25</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:8px;">
+                            <span style="color:var(--text-muted);">Completed Deliveries</span>
+                            <strong id="walletCompletedCount">14 runs</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:8px;">
+                            <span style="color:var(--text-muted);">Neighbor Rating</span>
+                            <strong style="color:#f59e0b;">⭐ 4.98</strong>
+                        </div>
+                    </div>
+
+                    <!-- Recent Payout History -->
+                    <div style="margin-top:24px;">
+                        <h4 style="font-size:0.85rem; font-weight:800; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px;">Recent Completed Runs</h4>
+                        <div id="walletHistoryList">
+                            <!-- Filled dynamically -->
+                        </div>
+                    </div>
+
+                </div>
+            </aside>
+
+        </div>
+    </div>
+
+    <!-- Allergy Protection Modal -->
+    <div class="allergy-banner" id="allergyBanner">
+        <strong style="color:var(--warning); display:flex; align-items:center; gap:6px;">
+            🛡️ Allergy Protection Activated
+        </strong>
+        <p id="allergyBannerText" style="font-size:0.85rem; color:var(--text-main); margin-top:6px; line-height:1.4;">
+            That item contains <strong>PEANUTS</strong>, which violates your active profile restriction. Would you like to substitute with Organic Almond Butter?
+        </p>
+        <div class="allergy-actions">
+            <button class="btn-substitute" onclick="acceptSubstitution('KR-AB-CREAMY-16')">
+                ✨ Swap to Almond Butter
+            </button>
+            <button class="btn-dismiss" onclick="dismissAllergyBanner()">Dismiss</button>
+        </div>
+    </div>
+
+    <!-- Product Details & Allergen Inspection Modal -->
+    <div class="product-modal-backdrop" id="productModal" onclick="if(event.target === this) closeProductModal();">
+        <div class="product-modal-card">
+            <button class="modal-close-btn" onclick="closeProductModal()">✕</button>
+            <div class="modal-grid">
+                <div class="modal-img-area">
+                    <img id="modalProductImg" src="" alt="" class="modal-img">
+                    <div id="modalOrganicBadge" class="modal-badge-org" style="display:none;">🌱 USDA Organic</div>
+                </div>
+                <div class="modal-details-area">
+                    <div class="modal-store-tag" id="modalStoreTag">💙 Walmart Rollback</div>
+                    <div class="modal-brand" id="modalBrand">Great Value</div>
+                    <h2 class="modal-title" id="modalTitle">Product Title</h2>
+                    <div class="modal-upc" id="modalUpc">UPC: 0078742351865</div>
+                    
+                    <div class="modal-rating-row">
+                        <span style="color:#f59e0b;">★★★★★</span>
+                        <span id="modalRatingText" style="font-size:0.85rem; font-weight:700; color:var(--text-main);">4.8 (1,840 reviews)</span>
+                        <span style="font-size:0.8rem; color:#10b981; font-weight:700; margin-left:8px;">● In Stock (Supercenter)</span>
+                    </div>
+
+                    <div class="modal-price-card">
+                        <div>
+                            <div class="modal-price" id="modalPrice">$2.98</div>
+                            <div class="modal-unit" id="modalUnit">per gallon</div>
+                        </div>
+                        <div id="modalDiffNotice" class="modal-savings-pill">
+                            💵 Save vs other stores
+                        </div>
+                    </div>
+
+                    <!-- Allergen Safeguard Inspection Card -->
+                    <div class="allergy-inspect-box allergy-safe" id="modalAllergyBox">
+                        <strong id="modalAllergyStatus">✅ Allergy Safe</strong>
+                        <p id="modalAllergyDesc" style="font-size:0.82rem; margin-top:2px;">No restricted allergens detected in ingredient statement.</p>
+                    </div>
+
+                    <!-- Ingredients Statement -->
+                    <div style="margin-top:14px;">
+                        <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Ingredients:</span>
+                        <p id="modalIngredients" style="font-size:0.82rem; color:var(--text-main); margin-top:3px; line-height:1.4; max-height:75px; overflow-y:auto;"></p>
+                    </div>
+
+                    <!-- Quantity & Add Action -->
+                    <div class="modal-actions-bar">
+                        <div class="qty-stepper">
+                            <button class="btn-step" onclick="adjustModalQty(-1)">−</button>
+                            <span id="modalQtyDisplay" class="qty-number">1</span>
+                            <button class="btn-step" onclick="adjustModalQty(1)">+</button>
+                        </div>
+                        <select class="unit-select" id="modalUnitSelect">
+                            <option value="count">count</option>
+                            <option value="gallon">gallon</option>
+                            <option value="oz">oz</option>
+                            <option value="lb">lb</option>
+                        </select>
+                        <button class="btn-add-cart-large" onclick="addFromModal()">
+                            + Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Savings Optimization Modal -->
+    <div class="product-modal-backdrop" id="optimizeModal" onclick="if(event.target === this) closeOptimizeModal();">
+        <div class="product-modal-card" style="max-width:520px; padding:28px;">
+            <button class="modal-close-btn" onclick="closeOptimizeModal()">✕</button>
+            <div style="font-size:2.8rem; text-align:center;">💵</div>
+            <h3 style="font-size:1.35rem; font-weight:800; text-align:center; margin-top:6px;">Walmart Savings Optimizer</h3>
+            <p id="optimizeSummaryText" style="text-align:center; color:var(--text-muted); font-size:0.88rem; margin-top:6px; line-height:1.4;">
+                Switching items in your cart to Walmart Rollback prices saves you money!
+            </p>
+            <div id="optimizeSwapsList" style="margin:20px 0; max-height:220px; overflow-y:auto; border:1px solid var(--border-light); border-radius:12px; padding:12px;">
+                <!-- Rendered swaps -->
+            </div>
+            <button class="btn-checkout" style="background:var(--walmart);" onclick="closeOptimizeModal()">
+                Done • Savings Applied
+            </button>
+        </div>
+    </div>
+
+    <!-- Order Confirmation & Biometric Delivery Tracker Modal -->
+    <div class="product-modal-backdrop" id="checkoutModal">
+        <div class="product-modal-card" style="max-width:540px; text-align:center; padding:32px 28px;">
+            <div style="font-size:3.5rem;">🎉</div>
+            <h2 style="font-size:1.5rem; font-weight:800; color:var(--text-main); margin-top:8px;">Order Placed Successfully!</h2>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-top:4px;">
+                Order ID: <strong id="orderIdText" style="color:var(--walmart);">WM-894120</strong> • 1-Tap Biometric Verified
+            </p>
+
+            <div style="margin:24px 0; background:#f8fafc; border:1px solid var(--border-light); border-radius:12px; padding:18px; text-align:left;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+                    <div style="width:28px; height:28px; border-radius:50%; background:#10b981; color:white; display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:700;">✓</div>
+                    <div>
+                        <strong style="font-size:0.88rem; display:block;">Order Confirmed & Sent to Store</strong>
+                        <span style="font-size:0.75rem; color:var(--text-muted);">Walmart Supercenter #2119</span>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+                    <div style="width:28px; height:28px; border-radius:50%; background:#0071dc; color:white; display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:700;">🚗</div>
+                    <div>
+                        <strong style="font-size:0.88rem; display:block;">Personal Shopper Assigned</strong>
+                        <span style="font-size:0.75rem; color:var(--text-muted);">Packing fresh & chilled items with temperature shield</span>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:28px; height:28px; border-radius:50%; background:#ecfdf5; color:#047857; display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:700;">🕒</div>
+                    <div>
+                        <strong style="font-size:0.88rem; display:block;">Delivery Window</strong>
+                        <span style="font-size:0.75rem; color:var(--primary-dark); font-weight:700;">Today, 6:00 PM – 8:00 PM (124 Market St)</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-checkout" onclick="closeCheckoutModal()">
+                Done • Back to Store
+            </button>
+        </div>
+    </div>
+
+    <!-- Namma Yatri Neighbor Order Request Modal -->
+    <div class="product-modal-backdrop" id="neighborModal" onclick="if(event.target === this) closeNeighborModal();">
+        <div class="product-modal-card" style="max-width:540px; padding:30px;">
+            <button class="modal-close-btn" onclick="closeNeighborModal()">✕</button>
+            <div style="font-size:2.6rem; text-align:center;">🤝</div>
+            <h3 style="font-size:1.35rem; font-weight:800; text-align:center; margin-top:6px;">Request In-Store Neighbor</h3>
+            <p style="text-align:center; color:var(--text-muted); font-size:0.85rem; margin-top:4px;">
+                Direct Peer-to-Peer Run • 0% Corporate Middleman Fee
+            </p>
+
+            <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:12px; padding:16px; margin:20px 0;">
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:8px;">
+                    <span>Grocery Shelf Cost (Real Store Price)</span>
+                    <strong id="neighborModalSubtotal">$0.00</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:8px; color:#065f46;">
+                    <span>Platform Commission (Namma Yatri Model)</span>
+                    <strong>$0.00 (0% Free)</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:8px;">
+                    <span>Direct Shopper Reward (100% to Neighbor)</span>
+                    <strong id="neighborModalBountyDisplay" style="color:var(--primary); font-size:1.05rem;">$5.50</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:800; border-top:1px dashed #a7f3d0; padding-top:10px; margin-top:8px;">
+                    <span>You Pay</span>
+                    <span id="neighborModalTotalDisplay" style="color:#065f46;">$0.00</span>
+                </div>
+            </div>
+
+            <!-- Bounty Adjuster -->
+            <div style="margin-bottom:20px;">
+                <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; color:var(--text-muted); display:block; margin-bottom:8px;">
+                    Select Neighbor Bounty (Fast 15-25 min delivery):
+                </label>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-step" style="flex:1; padding:10px; font-weight:800; border-radius:8px; border:1px solid var(--border-light); cursor:pointer;" onclick="setNeighborBounty(4.00, this)">$4.00</button>
+                    <button class="btn-step" style="flex:1; padding:10px; font-weight:800; border-radius:8px; border:2px solid var(--primary); background:var(--primary-light); color:var(--primary-dark); cursor:pointer;" onclick="setNeighborBounty(5.50, this)">$5.50 (Rec)</button>
+                    <button class="btn-step" style="flex:1; padding:10px; font-weight:800; border-radius:8px; border:1px solid var(--border-light); cursor:pointer;" onclick="setNeighborBounty(7.50, this)">$7.50</button>
+                    <button class="btn-step" style="flex:1; padding:10px; font-weight:800; border-radius:8px; border:1px solid var(--border-light); cursor:pointer;" onclick="setNeighborBounty(10.00, this)">$10.00</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; color:var(--text-muted); display:block; margin-bottom:4px;">
+                    Delivery Notes:
+                </label>
+                <input type="text" id="neighborOrderNotes" style="width:100%; padding:10px 14px; border-radius:8px; border:1px solid var(--border-light); font-family:inherit; font-size:0.85rem;" placeholder="e.g. Leave at apartment door 4B, ring doorbell...">
+            </div>
+
+            <button class="btn-neighbor-request" onclick="broadcastNeighborOrder()">
+                🚀 Broadcast to In-Store Neighbors
+            </button>
+        </div>
+    </div>
+
+    <!-- Payout Celebration Modal -->
+    <div class="product-modal-backdrop" id="payoutModal">
+        <div class="product-modal-card" style="max-width:500px; text-align:center; padding:32px 24px;">
+            <div style="font-size:3.5rem;">💸</div>
+            <h2 style="font-size:1.5rem; font-weight:800; color:#065f46; margin-top:8px;" id="payoutModalBountyText">
+                +$7.25 Added to Your Wallet!
+            </h2>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-top:4px;">
+                0% Corporate Platform Fee • You keep 100% of your earnings.
+            </p>
+
+            <div style="background:#f8fafc; border:1px solid var(--border-light); border-radius:12px; padding:16px; margin:20px 0; text-align:left;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.88rem;">
+                    <span style="color:var(--text-muted);">Delivery Status:</span>
+                    <strong style="color:#10b981;">✓ Doorstep Confirmed</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.88rem;">
+                    <span style="color:var(--text-muted);">New Available Balance:</span>
+                    <strong id="payoutModalNewBal" style="color:var(--text-main); font-size:1.1rem;">$25.75</strong>
+                </div>
+            </div>
+
+            <button class="btn-checkout" style="background:#0f172a;" onclick="closePayoutModal()">
+                Back to In-Store Radar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        const SESSION_ID = "groceries_demo_101";
+        const USER_ID = "sreeram_us";
+
+        // Curated Real US Supermarket Products Catalog with authentic packaging photography
+        const SEED_CATALOG = [
+            // Dairy & Eggs
+            {
+                sku: "WM-MILK-FAIRLIFE-WHOLE",
+                store: "Walmart",
+                title: "Fairlife Whole Ultra-Filtered Milk Lactose Free (52 fl oz)",
+                brand: "Fairlife",
+                category: "Dairy",
+                price: 4.48,
+                counterpart_price: 4.99,
+                standard_unit: "gallon",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/081/162/002/0169/front_en.308.400.jpg"
+            },
+            {
+                sku: "KR-MILK-FAIRLIFE-WHOLE",
+                store: "Kroger",
+                title: "Fairlife Whole Ultra-Filtered Milk Lactose Free (52 fl oz)",
+                brand: "Fairlife",
+                category: "Dairy",
+                price: 4.99,
+                counterpart_price: 4.48,
+                standard_unit: "gallon",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/081/162/002/0169/front_en.308.400.jpg"
+            },
+            {
+                sku: "WM-EGGS-PAST-12",
+                store: "Walmart",
+                title: "Vital Farms Pasture-Raised Large Grade A Brown Eggs (12 ct)",
+                brand: "Vital Farms",
+                category: "Dairy",
+                price: 5.98,
+                counterpart_price: 6.99,
+                standard_unit: "count",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/086/174/500/0010/front_en.72.400.jpg"
+            },
+            {
+                sku: "KR-EGGS-PAST-12",
+                store: "Kroger",
+                title: "Vital Farms Pasture-Raised Large Grade A Brown Eggs (12 ct)",
+                brand: "Vital Farms",
+                category: "Dairy",
+                price: 6.99,
+                counterpart_price: 5.98,
+                standard_unit: "count",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/086/174/500/0010/front_en.72.400.jpg"
+            },
+            {
+                sku: "WM-YOGURT-CHOB-32",
+                store: "Walmart",
+                title: "Chobani Nonfat Plain Greek Yogurt (32 oz Tub)",
+                brand: "Chobani",
+                category: "Dairy",
+                price: 5.48,
+                counterpart_price: 5.99,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/089/470/001/0137/front_en.640.400.jpg"
+            },
+            {
+                sku: "KR-YOGURT-CHOB-32",
+                store: "Kroger",
+                title: "Chobani Nonfat Plain Greek Yogurt (32 oz Tub)",
+                brand: "Chobani",
+                category: "Dairy",
+                price: 5.99,
+                counterpart_price: 5.48,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/089/470/001/0137/front_en.640.400.jpg"
+            },
+            {
+                sku: "WM-BUTTER-KERRY-SALT",
+                store: "Walmart",
+                title: "Kerrygold Pure Irish Butter Salted (8 oz)",
+                brand: "Kerrygold",
+                category: "Dairy",
+                price: 4.48,
+                counterpart_price: 4.99,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/076/770/700/1067/front_en.77.400.jpg"
+            },
+            {
+                sku: "KR-BUTTER-KERRY-SALT",
+                store: "Kroger",
+                title: "Kerrygold Pure Irish Butter Salted (8 oz)",
+                brand: "Kerrygold",
+                category: "Dairy",
+                price: 4.99,
+                counterpart_price: 4.48,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/076/770/700/1067/front_en.77.400.jpg"
+            },
+            {
+                sku: "WM-CHEESE-PHILLY-8",
+                store: "Walmart",
+                title: "Philadelphia Original Cream Cheese Brick (8 oz)",
+                brand: "Philadelphia",
+                category: "Dairy",
+                price: 3.88,
+                counterpart_price: 4.29,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/002/100/061/2239/front_en.60.400.jpg"
+            },
+            {
+                sku: "KR-CHEESE-DAISY-COTTAGE",
+                store: "Kroger",
+                title: "Daisy Pure & Natural 4% Small Curd Cottage Cheese (16 oz)",
+                brand: "Daisy",
+                category: "Dairy",
+                price: 3.19,
+                counterpart_price: 2.78,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/007/342/052/4401/front_en.95.400.jpg"
+            },
+            {
+                sku: "WM-MILK-ORG-GAL",
+                store: "Walmart",
+                title: "Horizon Organic Whole Milk with DHA Omega-3",
+                brand: "Horizon Organic",
+                category: "Dairy",
+                price: 4.68,
+                counterpart_price: 5.49,
+                standard_unit: "gallon",
+                is_organic: true,
+                image_url: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&auto=format&fit=crop&q=80"
+            },
+            {
+                sku: "KR-MILK-ORG-GAL",
+                store: "Kroger",
+                title: "Simple Truth Organic Whole Milk",
+                brand: "Simple Truth Organic",
+                category: "Dairy",
+                price: 5.49,
+                counterpart_price: 4.68,
+                standard_unit: "gallon",
+                is_organic: true,
+                image_url: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=500&auto=format&fit=crop&q=80"
+            },
+            // Bakery
+            {
+                sku: "WM-BREAD-DAVE-21",
+                store: "Walmart",
+                title: "Dave's Killer Bread Organic 21 Whole Grains and Seeds",
+                brand: "Dave's Killer Bread",
+                category: "Bakery",
+                price: 5.98,
+                counterpart_price: 6.49,
+                standard_unit: "oz",
+                is_organic: true,
+                image_url: "https://images.openfoodfacts.net/images/products/001/376/402/7053/front_en.454.400.jpg"
+            },
+            {
+                sku: "KR-BREAD-DAVE-21",
+                store: "Kroger",
+                title: "Dave's Killer Bread Organic 21 Whole Grains and Seeds",
+                brand: "Dave's Killer Bread",
+                category: "Bakery",
+                price: 6.49,
+                counterpart_price: 5.98,
+                standard_unit: "oz",
+                is_organic: true,
+                image_url: "https://images.openfoodfacts.net/images/products/001/376/402/7053/front_en.454.400.jpg"
+            },
+            {
+                sku: "WM-BREAD-SOUR-24",
+                store: "Walmart",
+                title: "Marketside Artisan Sourdough Loaf Bread",
+                brand: "Marketside",
+                category: "Bakery",
+                price: 3.98,
+                counterpart_price: 4.49,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?w=500&auto=format&fit=crop&q=80"
+            },
+            {
+                sku: "KR-BREAD-SOUR-24",
+                store: "Kroger",
+                title: "San Francisco Style Sourdough Bread",
+                brand: "La Brea Bakery",
+                category: "Bakery",
+                price: 4.49,
+                counterpart_price: 3.98,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?w=500&auto=format&fit=crop&q=80"
+            },
+            // Produce
+            {
+                sku: "WM-APPLES-HONEY-LB",
+                store: "Walmart",
+                title: "Organic Washington Honeycrisp Apples",
+                brand: "Marketside Organic",
+                category: "Produce",
+                price: 2.48,
+                counterpart_price: 2.99,
+                standard_unit: "lb",
+                is_organic: true,
+                image_url: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&auto=format&fit=crop&q=80"
+            },
+            {
+                sku: "KR-APPLES-HONEY-LB",
+                store: "Kroger",
+                title: "Organic Washington Honeycrisp Apples",
+                brand: "Simple Truth Organic",
+                category: "Produce",
+                price: 2.99,
+                counterpart_price: 2.48,
+                standard_unit: "lb",
+                is_organic: true,
+                image_url: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&auto=format&fit=crop&q=80"
+            },
+            {
+                sku: "WM-PROD-AVOCADO-BAG",
+                store: "Walmart",
+                title: "Organic Hass Avocados (4 Count Bag)",
+                brand: "Avocados From Mexico",
+                category: "Produce",
+                price: 3.98,
+                counterpart_price: 4.49,
+                standard_unit: "count",
+                is_organic: true,
+                image_url: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=500&auto=format&fit=crop&q=80"
+            },
+            {
+                sku: "WM-PROD-STRAWBERRY-1LB",
+                store: "Walmart",
+                title: "Driscoll's Fresh Organic Strawberries (16 oz)",
+                brand: "Driscoll's",
+                category: "Produce",
+                price: 3.98,
+                counterpart_price: 4.49,
+                standard_unit: "oz",
+                is_organic: true,
+                image_url: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=500&auto=format&fit=crop&q=80"
+            },
+            // Pantry & Sauces
+            {
+                sku: "WM-SAUCE-RAOS-MARINARA",
+                store: "Walmart",
+                title: "Rao's Homemade All Natural Marinara Sauce (24 oz)",
+                brand: "Rao's Homemade",
+                category: "Pantry",
+                price: 6.98,
+                counterpart_price: 7.99,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/074/747/900/0413/front_en.71.400.jpg"
+            },
+            {
+                sku: "KR-SAUCE-RAOS-MARINARA",
+                store: "Kroger",
+                title: "Rao's Homemade All Natural Marinara Sauce (24 oz)",
+                brand: "Rao's Homemade",
+                category: "Pantry",
+                price: 7.99,
+                counterpart_price: 6.98,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/074/747/900/0413/front_en.71.400.jpg"
+            },
+            {
+                sku: "WM-PASTA-KRAFT-MAC",
+                store: "Walmart",
+                title: "Kraft Original Flavor Macaroni & Cheese Dinner",
+                brand: "Kraft",
+                category: "Pantry",
+                price: 1.24,
+                counterpart_price: 1.49,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/002/100/065/8831/front_en.226.400.jpg"
+            },
+            {
+                sku: "WM-MAYO-HELLMANNS-30",
+                store: "Walmart",
+                title: "Hellmann's Real Mayonnaise Jar (30 fl oz)",
+                brand: "Hellmann's",
+                category: "Pantry",
+                price: 4.48,
+                counterpart_price: 4.99,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/004/800/121/3487/front_en.105.400.jpg"
+            },
+            {
+                sku: "WM-PB-CREAMY-16",
+                store: "Walmart",
+                title: "Jif Creamy Peanut Butter (16 oz)",
+                brand: "Jif",
+                category: "Pantry",
+                price: 2.78,
+                counterpart_price: 3.29,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/005/150/025/5162/front_en.187.400.jpg"
+            },
+            {
+                sku: "KR-PB-CREAMY-16",
+                store: "Kroger",
+                title: "Jif Creamy Peanut Butter (16 oz)",
+                brand: "Jif",
+                category: "Pantry",
+                price: 3.29,
+                counterpart_price: 2.78,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/005/150/025/5162/front_en.187.400.jpg"
+            },
+            {
+                sku: "KR-AB-CREAMY-16",
+                store: "Kroger",
+                title: "Justin's Classic Creamy Almond Butter (16 oz Jar)",
+                brand: "Justin's",
+                category: "Pantry",
+                price: 7.49,
+                counterpart_price: 6.98,
+                standard_unit: "oz",
+                is_organic: true,
+                image_url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=80"
+            },
+            // Breakfast & Cereals
+            {
+                sku: "WM-CEREAL-CHEERIOS-ORIG",
+                store: "Walmart",
+                title: "General Mills Original Cheerios Heart Healthy Cereal (8.9 oz)",
+                brand: "General Mills",
+                category: "Breakfast",
+                price: 3.98,
+                counterpart_price: 4.49,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/001/600/017/0032/front_en.47.400.jpg"
+            },
+            {
+                sku: "KR-CEREAL-CHEERIOS-ORIG",
+                store: "Kroger",
+                title: "General Mills Original Cheerios Heart Healthy Cereal (8.9 oz)",
+                brand: "General Mills",
+                category: "Breakfast",
+                price: 4.49,
+                counterpart_price: 3.98,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/001/600/017/0032/front_en.47.400.jpg"
+            },
+            {
+                sku: "WM-OATS-QUAKER-OLD",
+                store: "Walmart",
+                title: "Quaker Old Fashioned 100% Whole Grain Rolled Oats (42 oz)",
+                brand: "Quaker Oats",
+                category: "Breakfast",
+                price: 4.98,
+                counterpart_price: 5.49,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/003/000/001/0402/front_en.239.400.jpg"
+            },
+            // Snacks & Sweets
+            {
+                sku: "WM-CHOC-LINDT-70",
+                store: "Walmart",
+                title: "Lindt EXCELLENCE 70% Cocoa Dark Chocolate Bar",
+                brand: "Lindt",
+                category: "Snacks",
+                price: 3.48,
+                counterpart_price: 3.99,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.openfoodfacts.net/images/products/003/746/601/6450/front_en.68.400.jpg"
+            },
+            {
+                sku: "WM-COOKIE-OREO-DOUBLE",
+                store: "Walmart",
+                title: "Oreo Double Stuf Chocolate Sandwich Cookies",
+                brand: "Oreo",
+                category: "Snacks",
+                price: 4.28,
+                counterpart_price: 4.79,
+                standard_unit: "oz",
+                is_organic: false,
+                image_url: "https://images.unsplash.com/photo-1568051243851-f9b136146e97?w=500&auto=format&fit=crop&q=80"
+            }
+        ];
+
+        let catalogItems = [...SEED_CATALOG];
+        let currentStore = "all";
+        let currentCategory = "all";
+        let searchQuery = "";
+        let isRecording = false;
+        let speechRec = null;
+
+        function init() {
+            applyFilters();
+            fetchServerCatalog();
+            refreshCart();
+            setupSpeech();
+        }
+
+        async function fetchServerCatalog() {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/catalog?merchant=all`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        catalogItems = data.map(i => ({
+                            ...i,
+                            store: i.sku.startsWith("WM-") ? "Walmart" : "Kroger"
+                        }));
+                        applyFilters();
+                    }
+                }
+            } catch (err) {
+                console.warn("Using offline seed catalog:", err);
+            }
+        }
+
+        function setStoreFilter(store, btn) {
+            document.querySelectorAll(".store-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentStore = store;
+            const banner = document.getElementById("walmartStoreBanner");
+            if (banner) {
+                banner.style.display = store === "walmart" ? "flex" : "none";
+            }
+            applyFilters();
+        }
+
+        function setCategoryFilter(category, btn) {
+            document.querySelectorAll(".aisle-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentCategory = category;
+            applyFilters();
+        }
+
+        function handleCatalogSearch(text) {
+            searchQuery = text.toLowerCase().trim();
+            const input = document.getElementById("catalogSearchInput");
+            if (input && input.value !== text) input.value = text;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            let filtered = catalogItems;
+
+            if (currentStore !== "all") {
+                filtered = filtered.filter(i => (currentStore === "walmart" && i.sku.startsWith("WM-")) || (currentStore === "kroger" && i.sku.startsWith("KR-")));
+            }
+
+            if (currentCategory !== "all") {
+                filtered = filtered.filter(i => i.category.toLowerCase() === currentCategory.toLowerCase());
+            }
+
+            if (searchQuery) {
+                filtered = filtered.filter(i => 
+                    i.title.toLowerCase().includes(searchQuery) || 
+                    i.brand.toLowerCase().includes(searchQuery) ||
+                    i.category.toLowerCase().includes(searchQuery) ||
+                    i.sku.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            const countTag = document.getElementById("catalogCountTag");
+            if (countTag) {
+                countTag.innerText = `${filtered.length} Real Products`;
+            }
+
+            renderCatalog(filtered);
+        }
+
+        function renderCatalog(items) {
+            const grid = document.getElementById("productsGrid");
+            if (!items || items.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align:center; padding:50px 20px; color:var(--text-muted); background:#ffffff; border-radius:var(--radius-lg); border:1px dashed var(--border-light);">
+                        <div style="font-size:2rem; margin-bottom:10px;">🔍</div>
+                        <h4 style="font-size:1.1rem; color:var(--text-main); font-weight:700;">No matching products found</h4>
+                        <p style="font-size:0.85rem; margin-top:4px;">Try searching for "Great Value", "Fairlife", "Vital Farms", "Chobani", "Rao's", "Cheerios", or click an aisle above.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = items.map(item => {
+                const isWM = item.sku.startsWith("WM-");
+                const storeBadgeClass = isWM ? "store-tag-wm" : "store-tag-kr";
+                const storeLabel = isWM ? "💙 Walmart" : "🛒 Kroger";
+                
+                let diffText = "";
+                if (item.counterpart_price) {
+                    const diff = item.counterpart_price - item.price;
+                    if (diff > 0) {
+                        diffText = `<span class="store-diff-pill">💵 Save $${diff.toFixed(2)} vs ${isWM ? 'Kroger' : 'Walmart'}</span>`;
+                    }
+                }
+
+                const isPeanut = item.sku.includes("PB") || (item.title && item.title.toLowerCase().includes("peanut"));
+
+                return `
+                <div class="product-card">
+                    <div class="product-img-wrapper" onclick="openProductModal('${item.sku}')" style="cursor:pointer;" title="Click to inspect real product & nutrition">
+                        <img src="${item.image_url}" alt="${item.title}" class="product-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500';">
+                        ${item.is_organic ? '<span class="product-badge-float" style="color:var(--primary-dark);">🌱 USDA Organic</span>' : ''}
+                        <span class="store-tag-float ${storeBadgeClass}">
+                            ${storeLabel}
+                        </span>
+                    </div>
+                    <div class="product-body">
+                        <div class="product-brand">${item.brand}</div>
+                        <h3 class="product-title" onclick="openProductModal('${item.sku}')" style="cursor:pointer;" title="Click for details">${item.title}</h3>
+                        ${diffText}
+                        ${isPeanut ? '<span class="allergy-tag-warning">⚠️ Contains Peanuts</span>' : ''}
+                        
+                        <div class="product-price-row">
+                            <span class="product-price">$${item.price.toFixed(2)}</span>
+                            <span class="product-unit">per ${item.standard_unit}</span>
+                        </div>
+
+                        <div class="product-actions">
+                            <select class="unit-select" id="unit_${item.sku}">
+                                <option value="${item.standard_unit}">${item.standard_unit}</option>
+                                ${item.standard_unit === 'gallon' ? '<option value="half_gallon">half gal</option>' : ''}
+                                ${item.standard_unit === 'lb' ? '<option value="lb">lb</option>' : ''}
+                                ${item.standard_unit === 'oz' ? '<option value="oz">oz</option>' : ''}
+                            </select>
+                            <button class="btn-add-cart" onclick="addItemDirect('${item.sku}')">
+                                + Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }).join("");
+        }
+
+        async function refreshCart() {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/cart/${SESSION_ID}`);
+                if (res.ok) {
+                    const cart = await res.json();
+                    renderCart(cart);
+                }
+            } catch (err) {
+                console.error("Cart fetch error:", err);
+            }
+        }
+
+        function renderCart(cart) {
+            const list = document.getElementById("cartItemsList");
+            const bill = document.getElementById("cartBillSection");
+            const btnCheckout = document.getElementById("btnCheckout");
+            const btnOptimize = document.getElementById("btnOptimizeCart");
+            const btnNeighbor = document.getElementById("btnRequestNeighbor");
+            const countBadge = document.getElementById("cartCountBadge");
+
+            if (!cart || !cart.items || cart.items.length === 0) {
+                currentCartState = null;
+                list.innerHTML = `
+                    <div style="text-align:center; padding:40px 10px; color:var(--text-muted);">
+                        <div style="font-size:2.5rem; margin-bottom:8px;">🛒</div>
+                        <p style="font-weight:700; color:var(--text-main);">Your cart is empty</p>
+                        <p style="font-size:0.82rem;">Speak to the assistant or add items from the aisle!</p>
+                    </div>
+                `;
+                bill.style.display = "none";
+                btnCheckout.style.display = "none";
+                if (btnOptimize) btnOptimize.style.display = "none";
+                if (btnNeighbor) btnNeighbor.style.display = "none";
+                countBadge.innerText = "0";
+                return;
+            }
+
+            currentCartState = cart;
+            countBadge.innerText = cart.items.length;
+            bill.style.display = "block";
+            btnCheckout.style.display = "block";
+            if (btnOptimize) btnOptimize.style.display = "flex";
+            if (btnNeighbor) btnNeighbor.style.display = "flex";
+
+            document.getElementById("billSubtotal").innerText = `$${cart.subtotal.toFixed(2)}`;
+            document.getElementById("billTax").innerText = `$${cart.tax.toFixed(2)}`;
+            document.getElementById("billDelivery").innerText = `$${cart.delivery_fee.toFixed(2)}`;
+            document.getElementById("billTotal").innerText = `$${cart.cart_total.toFixed(2)}`;
+
+            list.innerHTML = cart.items.map(item => `
+                <div class="cart-item-row">
+                    <div class="cart-item-desc">
+                        <div class="cart-item-name">${item.title}</div>
+                        <div class="cart-item-meta">${item.quantity} ${item.unit} • $${item.unit_price.toFixed(2)} / ${item.unit}</div>
+                    </div>
+                    <div class="cart-item-price">$${item.total_price.toFixed(2)}</div>
+                    <button class="btn-remove-item" onclick="removeItem('${item.sku}')">✕</button>
+                </div>
+            `).join("");
+        }
+
+        async function addItemDirect(sku) {
+            const unitEl = document.getElementById(`unit_${sku}`);
+            const unit = unitEl ? unitEl.value : "count";
+
+            if (sku.includes("PB")) {
+                showAllergyBanner("Peanut Butter contains PEANUTS, which is on your allergy restriction list. Would you like Organic Almond Butter instead?");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/cart/${SESSION_ID}/add`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ sku, quantity: 1.0, unit, user_id: USER_ID })
+                });
+                const data = await res.json();
+                if (data.cart) renderCart(data.cart);
+            } catch (err) {
+                console.error("Add item failed:", err);
+            }
+        }
+
+        async function removeItem(sku) {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/cart/${SESSION_ID}/item/${sku}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.cart) renderCart(data.cart);
+            } catch (err) {
+                console.error("Remove failed:", err);
+            }
+        }
+
+        let currentModalItem = null;
+        let currentModalQty = 1;
+
+        function openProductModal(sku) {
+            const item = catalogItems.find(i => i.sku === sku);
+            if (!item) return;
+
+            currentModalItem = item;
+            currentModalQty = 1;
+
+            document.getElementById("modalProductImg").src = item.image_url;
+            document.getElementById("modalProductImg").onerror = function() {
+                this.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500';
+            };
+
+            const isWM = item.sku.startsWith("WM-");
+            document.getElementById("modalStoreTag").innerText = isWM ? "💙 Walmart Supercenter" : "🛒 Kroger";
+            document.getElementById("modalStoreTag").style.background = isWM ? "var(--walmart)" : "var(--kroger)";
+            document.getElementById("modalBrand").innerText = item.brand;
+            document.getElementById("modalTitle").innerText = item.title;
+            document.getElementById("modalUpc").innerText = `UPC: ${item.barcode || '0078742' + item.sku.slice(-6)}`;
+            
+            document.getElementById("modalRatingText").innerText = `${item.rating || 4.8} (${(item.review_count || 1240).toLocaleString()} reviews)`;
+            document.getElementById("modalPrice").innerText = `$${item.price.toFixed(2)}`;
+            document.getElementById("modalUnit").innerText = `per ${item.standard_unit}`;
+
+            const diffEl = document.getElementById("modalDiffNotice");
+            if (item.counterpart_price && item.counterpart_price > item.price) {
+                diffEl.style.display = "inline-block";
+                diffEl.innerText = `💵 Save $${(item.counterpart_price - item.price).toFixed(2)} vs other stores`;
+            } else {
+                diffEl.style.display = "none";
+            }
+
+            const orgBadge = document.getElementById("modalOrganicBadge");
+            orgBadge.style.display = item.is_organic ? "block" : "none";
+
+            const allergyBox = document.getElementById("modalAllergyBox");
+            const isPeanut = item.sku.includes("PB") || (item.title && item.title.toLowerCase().includes("peanut"));
+            if (isPeanut) {
+                allergyBox.className = "allergy-inspect-box allergy-warn";
+                document.getElementById("modalAllergyStatus").innerText = "⚠️ Allergy Conflict: Contains Peanuts";
+                document.getElementById("modalAllergyDesc").innerText = "This product conflicts with your active peanut allergy profile. We recommend Justin's Almond Butter instead.";
+            } else {
+                allergyBox.className = "allergy-inspect-box allergy-safe";
+                document.getElementById("modalAllergyStatus").innerText = "✅ Allergy Safe: Verified";
+                document.getElementById("modalAllergyDesc").innerText = "No restricted peanut allergens detected in the official ingredient listing.";
+            }
+
+            const ings = item.ingredients && item.ingredients.length > 0 ? item.ingredients.join(", ") : "Standard grocery ingredients statement.";
+            document.getElementById("modalIngredients").innerText = ings;
+
+            document.getElementById("modalQtyDisplay").innerText = currentModalQty;
+            const unitSelect = document.getElementById("modalUnitSelect");
+            unitSelect.value = item.standard_unit;
+
+            document.getElementById("productModal").style.display = "flex";
+        }
+
+        function closeProductModal() {
+            document.getElementById("productModal").style.display = "none";
+            currentModalItem = null;
+        }
+
+        function adjustModalQty(delta) {
+            currentModalQty = Math.max(1, Math.min(20, currentModalQty + delta));
+            document.getElementById("modalQtyDisplay").innerText = currentModalQty;
+        }
+
+        async function addFromModal() {
+            if (!currentModalItem) return;
+            const sku = currentModalItem.sku;
+            const unit = document.getElementById("modalUnitSelect").value;
+            const qty = currentModalQty;
+
+            if (sku.includes("PB")) {
+                closeProductModal();
+                showAllergyBanner("Peanut Butter contains PEANUTS, which is on your allergy restriction list. Would you like Organic Almond Butter instead?");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/cart/${SESSION_ID}/add`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ sku, quantity: qty, unit, user_id: USER_ID })
+                });
+                const data = await res.json();
+                if (data.cart) renderCart(data.cart);
+                closeProductModal();
+                showAssistantSpeech(`Added ${qty} ${unit} of ${currentModalItem.title} to your cart.`);
+            } catch (err) {
+                console.error("Add from modal failed:", err);
+            }
+        }
+
+        async function optimizeCartSavings() {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/cart/${SESSION_ID}/optimize`, { method: 'POST' });
+                const data = await res.json();
+                
+                const summary = document.getElementById("optimizeSummaryText");
+                const list = document.getElementById("optimizeSwapsList");
+                
+                if (data.total_savings > 0) {
+                    summary.innerHTML = `<strong>Total Savings: $${data.total_savings.toFixed(2)}</strong><br>By optimizing with Walmart everyday low prices, your basket drops from $${data.current_total.toFixed(2)} to $${data.optimized_total.toFixed(2)}!`;
+                    list.innerHTML = data.swaps.map(s => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #e2e8f0; font-size:0.85rem;">
+                            <div>
+                                <strong>${s.walmart_title}</strong>
+                                <div style="font-size:0.75rem; color:#64748b;">Walmart Rollback Alternative</div>
+                            </div>
+                            <div style="font-weight:800; color:#0284c7;">Save $${s.total_savings.toFixed(2)}</div>
+                        </div>
+                    `).join("");
+                } else {
+                    summary.innerText = "Your cart is already optimized for the lowest available prices across Walmart and Kroger!";
+                    list.innerHTML = `<div style="text-align:center; color:#64748b; padding:12px; font-size:0.85rem;">No cheaper alternatives required — you have the best price!</div>`;
+                }
+                document.getElementById("optimizeModal").style.display = "flex";
+                showAssistantSpeech(`I evaluated your basket. Walmart prices save you $${data.total_savings.toFixed(2)}!`);
+            } catch (err) {
+                console.error("Optimize failed:", err);
+            }
+        }
+
+        function closeOptimizeModal() {
+            document.getElementById("optimizeModal").style.display = "none";
+        }
+
+        async function triggerCheckout() {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/checkout/confirm`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        session_id: SESSION_ID,
+                        user_id: USER_ID,
+                        biometric_signature: "sig_apple_faceid_verified"
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById("orderIdText").innerText = (data.order && data.order.order_id) ? data.order.order_id : (data.order_id || `WM-${Math.floor(100000 + Math.random() * 900000)}`);
+                    document.getElementById("checkoutModal").style.display = "flex";
+                    showAssistantSpeech(`Biometric checkout confirmed! Your order is scheduled with Walmart for delivery today between 6 and 8 PM.`);
+                    refreshCart();
+                } else {
+                    showAssistantSpeech("Could not place order: " + (data.detail || "Cart is empty."));
+                }
+            } catch (err) {
+                console.error("Checkout failed:", err);
+            }
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById("checkoutModal").style.display = "none";
+            refreshCart();
+        }
+
+        async function handleVoiceCommand(overrideText = null) {
+            const input = document.getElementById("voiceCommandInput");
+            const text = overrideText || input.value.trim();
+            if (!text) return;
+
+            input.value = "";
+            document.getElementById("voiceStatusText").innerText = `Processing: "${text}"...`;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/cart/${SESSION_ID}/voice-command`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ utterance: text, user_id: USER_ID })
+                });
+                const data = await res.json();
+                showAssistantSpeech(data.spoken_response);
+
+                if (data.intent === "allergy_alert") {
+                    showAllergyBanner(data.allergy_warning);
+                } else if (data.intent === "checkout") {
+                    triggerCheckout();
+                } else if (data.cart) {
+                    renderCart(data.cart);
+                }
+                document.getElementById("voiceStatusText").innerText = "Voice Assistant Connected • Ready for commands";
+            } catch (err) {
+                console.error("Voice command error:", err);
+                document.getElementById("voiceStatusText").innerText = "Voice Assistant Connected • Ready for commands";
+            }
+        }
+
+        function sendQuickUtterance(text) {
+            document.getElementById("voiceCommandInput").value = text;
+            handleVoiceCommand(text);
+        }
+
+        function showAssistantSpeech(text) {
+            const bubble = document.getElementById("assistantBubble");
+            document.getElementById("assistantSpeechText").innerText = text;
+            bubble.style.display = "flex";
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utter);
+            }
+        }
+
+        function setupSpeech() {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) return;
+
+            speechRec = new SpeechRec();
+            speechRec.onstart = () => {
+                isRecording = true;
+                document.getElementById("btnMic").classList.add("recording");
+                document.getElementById("voiceStatusText").innerText = "Listening... speak your grocery order";
+            };
+
+            speechRec.onresult = (e) => {
+                const transcript = e.results[0][0].transcript;
+                document.getElementById("voiceCommandInput").value = transcript;
+                handleVoiceCommand(transcript);
+            };
+
+            speechRec.onend = () => {
+                isRecording = false;
+                document.getElementById("btnMic").classList.remove("recording");
+                document.getElementById("voiceStatusText").innerText = "Voice Assistant Connected • Ready for commands";
+            };
+        }
+
+        function toggleMicrophone() {
+            if (!speechRec) {
+                alert("Speech recognition is not supported in this browser. Please use Chrome/Edge or type your command!");
+                return;
+            }
+            if (isRecording) speechRec.stop();
+            else speechRec.start();
+        }
+
+        function showAllergyBanner(msg) {
+            document.getElementById("allergyBannerText").innerText = msg;
+            document.getElementById("allergyBanner").style.display = "block";
+        }
+
+        function dismissAllergyBanner() {
+            document.getElementById("allergyBanner").style.display = "none";
+        }
+
+        async function acceptSubstitution(sku) {
+            dismissAllergyBanner();
+            await addItemDirect(sku);
+            showAssistantSpeech("Swapped to Organic Almond Butter to protect against peanut allergens!");
+        }
+
+        function scrollToCart() {
+            document.getElementById("cartSidebar").scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ==========================================
+        // DUAL MODE & IN-STORE EARNER (NAMMA YATRI ETHOS)
+        // ==========================================
+        let platformMode = "customer"; // "customer" or "shopper"
+        let currentShopperOrders = [];
+        let currentActiveOrder = null;
+        let selectedNeighborBounty = 5.50;
+        let currentCartState = null;
+
+        function switchPlatformMode(mode) {
+            platformMode = mode;
+            const custView = document.getElementById("customerPlatformView");
+            const shopView = document.getElementById("shopperPlatformView");
+            const btnCust = document.getElementById("modeBtnCustomer");
+            const btnShop = document.getElementById("modeBtnShopper");
+
+            if (mode === "customer") {
+                custView.style.display = "block";
+                shopView.style.display = "none";
+                btnCust.classList.add("active");
+                btnShop.classList.remove("active");
+            } else {
+                custView.style.display = "none";
+                shopView.style.display = "block";
+                btnShop.classList.add("active");
+                btnCust.classList.remove("active");
+                fetchShopperOrders();
+                fetchShopperWallet();
+            }
+        }
+
+        async function fetchShopperOrders() {
+            try {
+                const storeEl = document.getElementById("shopperStoreDropdown");
+                const store = storeEl ? storeEl.value : "walmart";
+                const res = await fetch(`${API_BASE}/api/v1/p2p/orders?store=${store}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    currentShopperOrders = data;
+                    renderShopperOrdersFeed(data);
+                    
+                    const pill = document.getElementById("openOrdersPill");
+                    if (pill) pill.innerText = `${data.length} Live`;
+                    
+                    const statusText = document.getElementById("shopperRadarStatusText");
+                    if (statusText) statusText.innerText = `GPS Verified In-Store • ${data.length} Runs Waiting`;
+                }
+            } catch (err) {
+                console.error("Failed to load shopper orders:", err);
+            }
+        }
+
+        function renderShopperOrdersFeed(orders) {
+            const feed = document.getElementById("shopperOrdersFeed");
+            if (!feed) return;
+            if (!orders || orders.length === 0) {
+                feed.innerHTML = `
+                    <div style="background:#ffffff; border:1px dashed var(--border-light); border-radius:12px; padding:32px; text-align:center; color:var(--text-muted);">
+                        <div style="font-size:2rem; margin-bottom:8px;">📡</div>
+                        <h4>No open neighbor runs right now</h4>
+                        <p style="font-size:0.85rem; margin-top:4px;">As neighbors in this store's geofence place orders, they will appear here in real time.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            feed.innerHTML = orders.map(o => `
+                <div class="radar-card">
+                    <div class="radar-card-top">
+                        <div>
+                            <div class="radar-cust-name">
+                                <span>${o.customer_name}</span>
+                                <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); background:#f1f5f9; padding:2px 8px; border-radius:9999px;">
+                                    ${o.delivery_distance_miles} mi away
+                                </span>
+                            </div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+                                📍 ${o.delivery_address} • Placed ${o.created_at}
+                            </div>
+                        </div>
+                        <div class="radar-bounty-badge">
+                            +$${o.shopper_bounty.toFixed(2)} Cash
+                        </div>
+                    </div>
+
+                    <div style="font-size:0.85rem; font-weight:700; color:var(--text-main);">
+                        Items to Pick (${o.items.length}):
+                    </div>
+
+                    <div class="radar-item-preview-list">
+                        ${o.items.map(it => `
+                            <img src="${it.image_url}" title="${it.title} (${it.aisle})" class="radar-item-thumb" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500';">
+                        `).join("")}
+                    </div>
+
+                    ${o.notes ? `
+                        <div style="font-size:0.82rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; margin-bottom:14px; color:var(--text-main);">
+                            💬 <strong>Customer Note:</strong> ${o.notes}
+                        </div>
+                    ` : ''}
+
+                    <button class="btn-accept-order" onclick="acceptShopperOrder('${o.order_id}')">
+                        ⚡ Accept Run • Open AI In-Store Route (Earn $${o.shopper_bounty.toFixed(2)})
+                    </button>
+                </div>
+            `).join("");
+        }
+
+        async function acceptShopperOrder(orderId) {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/p2p/orders/${orderId}/accept`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ shopper_id: "shopper_alex_01", shopper_name: "Alex Morgan" })
+                });
+                if (res.ok) {
+                    const order = await res.json();
+                    currentActiveOrder = order;
+                    renderActiveAisleNavigator(order);
+                    fetchShopperOrders();
+                    document.getElementById("activeAisleNavigator").scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert("This run has already been accepted by another neighbor!");
+                    fetchShopperOrders();
+                }
+            } catch (err) {
+                console.error("Accept failed:", err);
+            }
+        }
+
+        function renderActiveAisleNavigator(order) {
+            const nav = document.getElementById("activeAisleNavigator");
+            nav.style.display = "block";
+
+            document.getElementById("activeNavCustTitle").innerText = `Shopping for ${order.customer_name} (${order.delivery_distance_miles} mi dropoff)`;
+            document.getElementById("activeNavNotes").innerText = order.notes ? `Note: ${order.notes}` : "Standard doorstep delivery.";
+            document.getElementById("activeNavBounty").innerText = `+$${order.shopper_bounty.toFixed(2)}`;
+
+            // Extract unique aisles in order
+            const aisles = [...new Set(order.items.map(i => i.aisle))];
+            const aisleBar = document.getElementById("aisleStepBar");
+            aisleBar.innerHTML = aisles.map((a, idx) => `
+                <div class="aisle-step-pill ${idx === 0 ? 'current' : ''}">
+                    ${a}
+                </div>
+            `).join("");
+
+            // Render pick list
+            const list = document.getElementById("activePickItemsList");
+            list.innerHTML = order.items.map(item => `
+                <div class="pick-item-card ${item.is_picked ? 'picked' : ''}" id="pickCard_${item.sku}">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <img src="${item.image_url}" style="width:50px; height:50px; object-fit:contain; background:white; border-radius:6px; border:1px solid #e2e8f0; padding:2px;" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500';">
+                        <div>
+                            <span style="font-size:0.72rem; font-weight:800; color:var(--primary-dark); background:var(--primary-light); padding:2px 8px; border-radius:9999px;">
+                                📍 ${item.aisle}
+                            </span>
+                            <div style="font-size:0.92rem; font-weight:800; color:var(--text-main); margin-top:3px;">${item.title}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted); font-family:monospace;">UPC: ${item.barcode || '0078742351866'}</div>
+                        </div>
+                    </div>
+                    <div>
+                        ${item.is_picked ? `
+                            <span style="color:#059669; font-weight:800; font-size:0.85rem; display:flex; align-items:center; gap:4px;">
+                                ✓ Verified in Cart
+                            </span>
+                        ` : `
+                            <button class="btn-scan-upc" onclick="scanPickItem('${order.order_id}', '${item.sku}')">
+                                📷 Scan Barcode
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `).join("");
+
+            const pickedCount = order.items.filter(i => i.is_picked).length;
+            document.getElementById("pickProgressText").innerText = `Items Picked: ${pickedCount} / ${order.items.length}`;
+
+            const btnFinish = document.getElementById("btnFinishCheckout");
+            if (pickedCount === order.items.length) {
+                btnFinish.innerText = "🧾 Register Checked Out • Start Doorstep Delivery";
+                btnFinish.style.background = "#059669";
+                btnFinish.onclick = () => finishCheckoutRun();
+            } else {
+                btnFinish.innerText = "🧾 Proceed to Register & Delivery";
+                btnFinish.style.background = "#0f172a";
+                btnFinish.onclick = () => finishCheckoutRun();
+            }
+        }
+
+        async function scanPickItem(orderId, sku) {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/p2p/orders/${orderId}/pick`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ sku: sku })
+                });
+                if (res.ok) {
+                    const updated = await res.json();
+                    currentActiveOrder = updated;
+                    renderActiveAisleNavigator(updated);
+                }
+            } catch (err) {
+                console.error("Pick error:", err);
+            }
+        }
+
+        async function finishCheckoutRun() {
+            if (!currentActiveOrder) return;
+            const unpicked = currentActiveOrder.items.filter(i => !i.is_picked);
+            if (unpicked.length > 0) {
+                for (const u of unpicked) {
+                    await scanPickItem(currentActiveOrder.order_id, u.sku);
+                }
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/p2p/orders/${currentActiveOrder.order_id}/checkout`, { method: 'POST' });
+                if (res.ok) {
+                    const btn = document.getElementById("btnFinishCheckout");
+                    btn.innerText = `🏠 Confirm Doorstep Dropoff (Collect $${currentActiveOrder.shopper_bounty.toFixed(2)})`;
+                    btn.style.background = "linear-gradient(135deg, #10b981, #059669)";
+                    btn.onclick = () => completeDropoff(currentActiveOrder.order_id);
+                    alert("Register checkout verified! Head to the customer's delivery address to drop off and receive your 100% bounty.");
+                }
+            } catch (err) {
+                console.error("Checkout run error:", err);
+            }
+        }
+
+        async function completeDropoff(orderId) {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/p2p/orders/${orderId}/deliver?shopper_id=shopper_alex_01`, { method: 'POST' });
+                if (res.ok) {
+                    const order = await res.json();
+                    document.getElementById("payoutModalBountyText").innerText = `+$${order.shopper_bounty.toFixed(2)} Credited!`;
+                    await fetchShopperWallet();
+                    document.getElementById("payoutModal").style.display = "flex";
+                    document.getElementById("activeAisleNavigator").style.display = "none";
+                    currentActiveOrder = null;
+                    fetchShopperOrders();
+                }
+            } catch (err) {
+                console.error("Deliver error:", err);
+            }
+        }
+
+        function closePayoutModal() {
+            document.getElementById("payoutModal").style.display = "none";
+        }
+
+        async function fetchShopperWallet() {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/p2p/wallet/shopper_alex_01`);
+                if (res.ok) {
+                    const w = await res.json();
+                    const elBal = document.getElementById("walletAvailableBalance");
+                    if (elBal) elBal.innerText = `$${w.available_balance.toFixed(2)}`;
+                    
+                    const elLife = document.getElementById("walletLifetimeEarnings");
+                    if (elLife) elLife.innerText = `$${w.total_earned.toFixed(2)}`;
+                    
+                    const elDone = document.getElementById("walletCompletedCount");
+                    if (elDone) elDone.innerText = `${w.completed_deliveries} runs`;
+                    
+                    const pNewBal = document.getElementById("payoutModalNewBal");
+                    if (pNewBal) pNewBal.innerText = `$${w.available_balance.toFixed(2)}`;
+
+                    const hist = document.getElementById("walletHistoryList");
+                    if (hist && w.payouts_history) {
+                        hist.innerHTML = w.payouts_history.slice(0, 4).map(h => `
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f1f5f9; font-size:0.82rem;">
+                                <div>
+                                    <strong style="color:var(--text-main);">${h.store || 'Walmart'}</strong>
+                                    <div style="font-size:0.72rem; color:var(--text-muted);">${h.date} • ${h.items || 2} items</div>
+                                </div>
+                                <div style="font-weight:800; color:#059669;">+$${h.amount.toFixed(2)}</div>
+                            </div>
+                        `).join("");
+                    }
+                }
+            } catch (err) {
+                console.error("Wallet error:", err);
+            }
+        }
+
+        async function triggerWalletCashout() {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/p2p/wallet/shopper_alex_01/cashout`, { method: 'POST' });
+                if (res.ok) {
+                    const data = await res.json();
+                    alert(`🎉 Instant Cashout Succeeded!\n\nAmount: $${data.amount_cashed_out.toFixed(2)}\nDestination: ${data.destination}\nPlatform Fee: $0.00 (100% Payout)`);
+                    fetchShopperWallet();
+                }
+            } catch (err) {
+                alert("Cashout failed: " + err.message);
+            }
+        }
+
+        function openNeighborModal() {
+            if (!currentCartState || currentCartState.items.length === 0) {
+                alert("Your cart is empty. Add items first!");
+                return;
+            }
+            document.getElementById("neighborModalSubtotal").innerText = `$${currentCartState.subtotal.toFixed(2)}`;
+            updateNeighborModalTotal();
+            document.getElementById("neighborModal").style.display = "flex";
+        }
+
+        function closeNeighborModal() {
+            document.getElementById("neighborModal").style.display = "none";
+        }
+
+        function setNeighborBounty(amount, btn) {
+            selectedNeighborBounty = amount;
+            btn.parentElement.querySelectorAll("button").forEach(b => {
+                b.style.borderColor = "var(--border-light)";
+                b.style.background = "#ffffff";
+                b.style.color = "var(--text-main)";
+            });
+            btn.style.borderColor = "var(--primary)";
+            btn.style.background = "var(--primary-light)";
+            btn.style.color = "var(--primary-dark)";
+            updateNeighborModalTotal();
+        }
+
+        function updateNeighborModalTotal() {
+            const subtotal = currentCartState ? currentCartState.subtotal : 0;
+            const total = subtotal + selectedNeighborBounty;
+            document.getElementById("neighborModalBountyDisplay").innerText = `$${selectedNeighborBounty.toFixed(2)}`;
+            document.getElementById("neighborModalTotalDisplay").innerText = `$${total.toFixed(2)}`;
+        }
+
+        async function broadcastNeighborOrder() {
+            if (!currentCartState) return;
+            const notes = document.getElementById("neighborOrderNotes").value;
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/p2p/orders`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        session_id: SESSION_ID,
+                        customer_id: USER_ID,
+                        customer_name: "Sreeram V.",
+                        delivery_address: "124 Market St, Apt 4B (0.6 mi away)",
+                        tip: selectedNeighborBounty - 4.00 > 0 ? selectedNeighborBounty - 4.00 : 1.50,
+                        notes: notes,
+                        store: "walmart"
+                    })
+                });
+                if (res.ok) {
+                    const order = await res.json();
+                    closeNeighborModal();
+                    refreshCart();
+                    showAssistantSpeech(`Your order is broadcasted to nearby in-store shoppers! A neighbor at Walmart will pick your items and drop them off in 15-20 minutes.`);
+                    alert(`🚀 Order Broadcasted!\n\nOrder ID: ${order.order_id}\nShopper Bounty: $${order.shopper_bounty.toFixed(2)} (100% to neighbor)\nPlatform Fee: $0.00`);
+                    fetchShopperOrders();
+                } else {
+                    const err = await res.json();
+                    alert("Could not broadcast: " + (err.detail || "Error"));
+                }
+            } catch (err) {
+                console.error("Broadcast failed:", err);
+            }
+        }
+
+        function init() {
+            applyFilters();
+            fetchServerCatalog();
+            refreshCart();
+            setupSpeech();
+            fetchShopperOrders();
+            fetchShopperWallet();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
